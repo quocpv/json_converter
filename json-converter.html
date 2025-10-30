@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Trình Chuyển Đổi JSON</title>
+
+    <!-- Tải Tailwind CSS -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tải font Inter -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        /* Sử dụng font Inter làm font chữ mặc định */
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+        }
+
+        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
+
+        textarea::-webkit-scrollbar {
+
+            width: 8px;
+
+        }
+
+        textarea::-webkit-scrollbar-track {
+
+            background: #2d3748; /* bg-gray-800 */
+
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+
+            background: #4a5568; /* bg-gray-600 */
+
+            border-radius: 4px;
+
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+
+            background: #718096; /* bg-gray-500 */
+
+        }
+
+    </style>
+
+</head>
+
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Tiêu đề -->
+
+        <header class="text-center mb-8">
+
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-400">Trình Chuyển Đổi JSON</h1>
+
+            <p class="text-lg text-gray-400 mt-2">Chuyển đổi giữa Raw JSON Object và Escaped JSON String một cách dễ dàng.</p>
+
+        </header>
+
+ 
+
+        <!-- Bảng điều khiển (Nút bấm) -->
+
+        <div class="flex justify-center items-center gap-2 md:gap-4 my-6 flex-wrap">
+
+            <button id="escapeBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1 mr-2" viewBox="0 0 20 20" fill="currentColor">
+
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+
+                </svg>
+
+                Escape (JSON &rarr; String)
+
+            </button>
+
+            <button id="unescapeBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
+
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1 mr-2" viewBox="0 0 20 20" fill="currentColor">
+
+                  <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 111.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+
+                </svg>
+
+                Unescape (String &rarr; JSON)
+
+            </button>
+
+           
+
+            <!-- NÚT GEMINI MỚI -->
+
+            <button id="generateBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
+
+                ✨ Tạo JSON
+
+            </button>
+
+            <button id="fixBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
+
+                ✨ Sửa lỗi JSON
+
+            </button>
+
+            <button id="explainBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
+
+                ✨ Giải thích JSON
+
+            </button>
+
+            <!-- KẾT THÚC NÚT GEMINI -->
+
+ 
+
+            <button id="swapBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1" viewBox="0 0 20 20" fill="currentColor">
+
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+
+                </svg>
+
+                Hoán đổi
+
+            </button>
+
+            <!-- NÚT ĐỊNH DẠNG MỚI -->
+
+            <button id="formatBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
+
+                Định dạng: Gọn
+
+            </button>
+
+            <button id="clearBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1" viewBox="0 0 20 20" fill="currentColor">
+
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+
+                </svg>
+
+                Xóa
+
+            </button>
+
+        </div>
+
+       
+
+        <!-- Thông báo Trạng thái/Lỗi -->
+
+        <div id="statusMessage" class="text-center h-6 mb-4 font-medium"></div>
+
+ 
+
+        <!-- Hai khung nhập liệu -->
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Khung bên trái: Đầu vào -->
+
+            <div>
+
+                <label for="inputArea" class="block text-sm font-medium text-gray-300 mb-2">Đầu vào (Raw JSON hoặc Escaped String)</label>
+
+                <textarea id="inputArea"
+
+                    class="w-full min-h-[400px] md:h-96 p-4 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-blue-500 focus:ring-blue-500 outline-none transition-colors"
+
+                    placeholder="Dán JSON hoặc Chuỗi của bạn vào đây..."></textarea>
+
+            </div>
+
+           
+
+            <!-- Khung bên phải: Đầu ra -->
+
+            <div>
+
+                <label for="outputArea" class="block text-sm font-medium text-gray-300 mb-2">Đầu ra (Kết quả chuyển đổi)</label>
+
+                <textarea id="outputArea"
+
+                    class="w-full min-h-[400px] md:h-96 p-4 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-gray-700 focus:ring-0 outline-none"
+
+-                   readonly
+
+                    placeholder="Kết quả sẽ xuất hiện ở đây..."></textarea>
+
+            </div>
+
+        </div>
+
+    </div>
+
+ 
+
+    <script>
+
+        // Lấy các phần tử DOM
+
+        const inputArea = document.getElementById('inputArea');
+
+        const outputArea = document.getElementById('outputArea');
+
+        const escapeBtn = document.getElementById('escapeBtn');
+
+        const unescapeBtn = document.getElementById('unescapeBtn');
+
+        const swapBtn = document.getElementById('swapBtn');
+
+        const clearBtn = document.getElementById('clearBtn');
+
+        const statusMessage = document.getElementById('statusMessage');
+
+ 
+
+        // Nút Gemini
+
+        const generateBtn = document.getElementById('generateBtn');
+
+        const fixBtn = document.getElementById('fixBtn');
+
+        const explainBtn = document.getElementById('explainBtn');
+
+        const formatBtn = document.getElementById('formatBtn'); // Nút mới
+
+ 
+
+        // Trạng thái định dạng: false = Gọn (Compact), true = Đẹp (Pretty)
+
+        let isPrettyFormat = false;
+
+ 
+
+        /**
+
+         * Hiển thị thông báo trạng thái hoặc lỗi
+
+         * @param {string} message - Nội dung thông báo
+
+         * @param {boolean} isError - true nếu là lỗi, false nếu là thành công
+
+         * @param {boolean} isLoading - true nếu đang tải
+
+         */
+
+        function showMessage(message, isError = false, isLoading = false) {
+
+            statusMessage.textContent = message;
+
+            statusMessage.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400');
+
+           
+
+            if (isError) {
+
+                statusMessage.classList.add('text-red-400');
+
+            } else if (isLoading) {
+
+                statusMessage.classList.add('text-yellow-400');
+
+            } else {
+
+                statusMessage.classList.add('text-green-400');
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * Chức năng Escape: Chuyển Raw JSON thành Escaped String
+
+         */
+
+        function escapeJson() {
+
+            const inputText = inputArea.value.trim();
+
+            if (!inputText) {
+
+                showMessage("Lỗi: Không có nội dung đầu vào.", true);
+
+                return;
+
+            }
+
+ 
+
+            try {
+
+                // 1. Phân tích cú pháp JSON để xác thực nó
+
+                const obj = JSON.parse(inputText);
+
+               
+
+                // 2. Chuyển đối tượng thành một chuỗi JSON thu gọn
+
+                const minifiedString = JSON.stringify(obj);
+
+               
+
+                // 3. Stringify chuỗi đó một lần nữa để escape tất cả các ký tự
+
+                // và thêm dấu ngoặc kép bên ngoài.
+
+                const escapedString = JSON.stringify(minifiedString);
+
+               
+
+                outputArea.value = escapedString;
+
+                showMessage("Đã escape JSON thành chuỗi thành công!", false);
+
+            } catch (e) {
+
+                // Nếu JSON.parse thất bại, đó là JSON không hợp lệ
+
+                showMessage("Lỗi: JSON đầu vào không hợp lệ. " + e.message, true);
+
+                outputArea.value = '';
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * Chức năng Unescape: Chuyển Escaped String thành Raw JSON
+
+         */
+
+        function unescapeJson() {
+
+            const inputText = inputArea.value.trim();
+
+            if (!inputText) {
+
+                showMessage("Lỗi: Không có nội dung đầu vào.", true);
+
+                return;
+
+            }
+
+ 
+
+            try {
+
+                // 1. Phân tích cú pháp chuỗi bên ngoài (loại bỏ dấu ngoặc kép bên ngoài và unescape)
+
+                // Vd: "\"{\\\"key\\\":\\\"value\\\"}\""  -->  "{\"key\":\"value\"}"
+
+                const unescapedString = JSON.parse(inputText);
+
+ 
+
+                // 2. Kiểm tra xem kết quả có phải là một chuỗi không
+
+                if (typeof unescapedString !== 'string') {
+
+                    throw new Error("Đầu vào không phải là một chuỗi JSON đã được escape (thiếu dấu ngoặc kép bao ngoài).");
+
+                }
+
+ 
+
+                // 3. Phân tích cú pháp chuỗi JSON bên trong
+
+                // Vd: "{\"key\":\"value\"}"  -->  { key: "value" }
+
+                const obj = JSON.parse(unescapedString);
+
+               
+
+                // 4. Định dạng lại đối tượng JSON
+
+                const formattedJson = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
+
+               
+
+                outputArea.value = formattedJson;
+
+                showMessage("Đã unescape chuỗi thành JSON thành công!", false);
+
+            } catch (e) {
+
+                // Nếu bất kỳ bước JSON.parse nào thất bại
+
+                showMessage("Lỗi: Chuỗi escape không hợp lệ. " + e.message, true);
+
+                outputArea.value = '';
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * Chức năng Hoán đổi: Đảo ngược nội dung 2 khung
+
+         */
+
+        function swapContent() {
+
+            const temp = inputArea.value;
+
+            inputArea.value = outputArea.value;
+
+            outputArea.value = temp;
+
+            showMessage("Đã hoán đổi nội dung.", false);
+
+        }
+
+ 
+
+        /**
+
+         * Chức năng Xóa: Xóa sạch nội dung
+
+         */
+
+        function clearContent() {
+
+            inputArea.value = '';
+
+            outputArea.value = '';
+
+            statusMessage.textContent = '';
+
+        }
+
+ 
+
+        // --- TÍNH NĂNG GEMINI API ---
+
+ 
+
+        /**
+
+         * Hàm gọi API của Gemini
+
+         * @param {string} userPrompt - Câu lệnh của người dùng
+
+         * @param {string} systemInstruction - Hướng dẫn hệ thống cho LLM
+
+         * @returns {Promise<string | null>} - Văn bản phản hồi từ LLM hoặc null nếu lỗi
+
+         */
+
+        async function callGemini(userPrompt, systemInstruction) {
+
+            showMessage("Đang gọi Gemini... ✨", false, true);
+
+            const apiKey = ""; // API key sẽ được cung cấp bởi môi trường
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+ 
+
+            const payload = {
+
+                contents: [{ parts: [{ text: userPrompt }] }],
+
+                systemInstruction: {
+
+                    parts: [{ text: systemInstruction }]
+
+                },
+
+            };
+
+ 
+
+            try {
+
+                // Triển khai chiến lược backoff đơn giản
+
+                let response;
+
+                let attempts = 0;
+
+                const maxAttempts = 3;
+
+                let delay = 1000; // 1 giây
+
+ 
+
+                while (attempts < maxAttempts) {
+
+                    response = await fetch(apiUrl, {
+
+                        method: 'POST',
+
+                        headers: { 'Content-Type': 'application/json' },
+
+                        body: JSON.stringify(payload)
+
+                    });
+
+ 
+
+                    if (response.ok) {
+
+                        break; // Thành công, thoát khỏi vòng lặp
+
+                    }
+
+                   
+
+                    if (response.status === 429) { // Quá nhiều yêu cầu
+
+                        console.warn(`API Rate limit exceeded. Retrying in ${delay}ms...`);
+
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        delay *= 2; // Tăng gấp đôi thời gian chờ
+
+                        attempts++;
+
+                    } else {
+
+                        // Lỗi khác, không thử lại
+
+                        const errorBody = await response.text();
+
+                        throw new Error(`Lỗi API: ${response.status} ${response.statusText}. Chi tiết: ${errorBody}`);
+
+                    }
+
+                }
+
+ 
+
+                if (!response.ok) {
+
+                    throw new Error(`Đã hết số lần thử lại API. Lỗi cuối cùng: ${response.status}`);
+
+                }
+
+ 
+
+                const result = await response.json();
+
+               
+
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
+
+                    const text = result.candidates[0].content.parts[0].text;
+
+                    // Xóa các dấu ```json và ``` có thể LLM trả về
+
+                    const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+                    return cleanedText;
+
+                } else {
+
+                    // Xử lý các trường hợp bị chặn hoặc không có nội dung
+
+                    if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
+
+                        throw new Error("Nội dung bị chặn vì lý do an toàn.");
+
+                    } else if (result.promptFeedback && result.promptFeedback.blockReason) {
+
+                         throw new Error(`Nội dung bị chặn: ${result.promptFeedback.blockReason}`);
+
+                    } else {
+
+                        throw new Error("Không nhận được phản hồi hợp lệ từ API.");
+
+                    }
+
+                }
+
+            } catch (e) {
+
+                console.error(e);
+
+                showMessage(`Lỗi: ${e.message}`, true);
+
+                return null; // Trả về null khi có lỗi
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * ✨ Chức năng Tạo JSON: Gọi Gemini để tạo JSON từ văn bản
+
+         */
+
+        async function generateJson() {
+
+            const prompt = inputArea.value.trim();
+
+            if (!prompt) {
+
+                showMessage("Lỗi: Vui lòng nhập mô tả để tạo JSON.", true);
+
+                return;
+
+            }
+
+           
+
+            const systemPrompt = "Bạn là một công cụ tạo JSON. Dựa trên mô tả của người dùng, hãy tạo một đối tượng hoặc mảng JSON hợp lệ. Chỉ trả lời bằng mã JSON. Không bao gồm '```json' hoặc bất kỳ văn bản giải thích nào, chỉ trả về JSON thô.";
+
+           
+
+            const result = await callGemini(prompt, systemPrompt);
+
+            if (result) {
+
+                try {
+
+                    // Thử parse để xác thực và làm đẹp
+
+                    const obj = JSON.parse(result);
+
+                    outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
+
+                    showMessage("Đã tạo JSON thành công! ✨", false);
+
+                } catch (e) {
+
+                    // Nếu LLM trả về không phải JSON, chỉ cần dán văn bản thô
+
+                    outputArea.value = result;
+
+                    showMessage("Đã nhận phản hồi, nhưng không phải là JSON hợp lệ.", true);
+
+                }
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * ✨ Chức năng Sửa lỗi JSON: Gọi Gemini để sửa JSON không hợp lệ
+
+         */
+
+        async function fixJson() {
+
+            const brokenJson = inputArea.value.trim();
+
+            if (!brokenJson) {
+
+                showMessage("Lỗi: Vui lòng nhập JSON bị lỗi để sửa.", true);
+
+                return;
+
+            }
+
+           
+
+            const systemPrompt = "JSON sau đây không hợp lệ hoặc bị hỏng. Hãy phân tích nó, sửa các lỗi cú pháp (như thiếu dấu phẩy, dấu ngoặc kép hoặc dấu ngoặc) và trả về JSON đã được sửa, hợp lệ. Chỉ trả lời bằng khối mã JSON đã sửa. Không bao gồm '```json' hoặc bất kỳ văn bản giải thích nào.";
+
+ 
+
+            const result = await callGemini(brokenJson, systemPrompt);
+
+            if (result) {
+
+                try {
+
+                    // Xác thực và làm đẹp JSON đã sửa
+
+                    const obj = JSON.parse(result);
+
+                    outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
+
+                    showMessage("Đã sửa lỗi JSON thành công! ✨", false);
+
+                } catch (e) {
+
+                    // Nếu LLM vẫn trả về JSON không hợp lệ
+
+                    outputArea.value = result; // Hiển thị những gì nó đã cố gắng
+
+                    showMessage("Gemini đã cố gắng sửa, nhưng kết quả vẫn không phải là JSON hợp lệ.", true);
+
+                }
+
+            }
+
+        }
+
+ 
+
+        /**
+
+         * ✨ Chức năng Giải thích JSON: Gọi Gemini để giải thích JSON
+
+         */
+
+        async function explainJson() {
+
+            const jsonText = inputArea.value.trim();
+
+            if (!jsonText) {
+
+                showMessage("Lỗi: Vui lòng nhập JSON để giải thích.", true);
+
+                return;
+
+            }
+
+ 
+
+            // Kiểm tra xem JSON có hợp lệ không trước khi gửi
+
+            try {
+
+                JSON.parse(jsonText);
+
+            } catch (e) {
+
+                showMessage("Lỗi: Chỉ có thể giải thích JSON hợp lệ. Có vẻ như JSON của bạn bị lỗi.", true);
+
+                return;
+
+            }
+
+           
+
+            const systemPrompt = "Bạn là một nhà phân tích dữ liệu JSON. Hãy giải thích ngắn gọn dữ liệu JSON sau đây đại diện cho điều gì trong một hoặc hai câu. Trả lời bằng tiếng Việt.";
+
+ 
+
+            const result = await callGemini(jsonText, systemPrompt);
+
+            if (result) {
+
+                outputArea.value = result;
+
+                showMessage("Đã giải thích JSON thành công! ✨", false);
+
+            }
+
+        }
+
+ 
+
+        // Gán sự kiện cho các nút
+
+        escapeBtn.addEventListener('click', escapeJson);
+
+        unescapeBtn.addEventListener('click', unescapeJson);
+
+        swapBtn.addEventListener('click', swapContent);
+
+        clearBtn.addEventListener('click', clearContent);
+
+ 
+
+        // Gán sự kiện cho các nút Gemini
+
+        generateBtn.addEventListener('click', generateJson);
+
+        fixBtn.addEventListener('click', fixJson);
+
+        explainBtn.addEventListener('click', explainJson);
+
+ 
+
+        // Gán sự kiện cho nút Định dạng
+
+        formatBtn.addEventListener('click', () => {
+
+            // Đảo ngược trạng thái
+
+            isPrettyFormat = !isPrettyFormat;
+
+           
+
+            // Cập nhật giao diện nút
+
+            if (isPrettyFormat) {
+
+                formatBtn.textContent = 'Định dạng: Đẹp';
+
+                formatBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
+
+                formatBtn.classList.add('bg-teal-600', 'hover:bg-teal-700');
+
+            } else {
+
+                formatBtn.textContent = 'Định dạng: Gọn';
+
+                formatBtn.classList.remove('bg-teal-600', 'hover:bg-teal-700');
+
+                formatBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
+
+            }
+
+ 
+
+            // Thử định dạng lại nội dung hiện có trong outputArea
+
+            const currentOutput = outputArea.value.trim();
+
+            if (currentOutput) {
+
+                try {
+
+                    const obj = JSON.parse(currentOutput);
+
+                    // Chỉ định dạng lại nếu nó là JSON hợp lệ
+
+                    outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
+
+                    showMessage(isPrettyFormat ? "Đã định dạng: Đẹp" : "Đã định dạng: Gọn", false);
+
+                } catch (e) {
+
+                    // Bỏ qua nếu không phải JSON (ví dụ: là văn bản giải thích)
+
+                }
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
+
+ 
