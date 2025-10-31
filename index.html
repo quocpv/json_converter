@@ -1,867 +1,748 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Trình Chuyển Đổi JSON</title>
-
+    <title>Trình Chuyển Đổi & Cấu Hình</title>
     <!-- Tải Tailwind CSS -->
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <!-- Tải font Inter -->
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
-
         /* Sử dụng font Inter làm font chữ mặc định */
-
         body {
-
             font-family: 'Inter', sans-serif;
-
         }
 
         /* Tùy chỉnh thanh cuộn cho đẹp hơn */
-
         textarea::-webkit-scrollbar {
-
             width: 8px;
-
         }
 
         textarea::-webkit-scrollbar-track {
-
-            background: #2d3748; /* bg-gray-800 */
-
+            background: #2d3748;
+            /* bg-gray-800 */
         }
 
         textarea::-webkit-scrollbar-thumb {
-
-            background: #4a5568; /* bg-gray-600 */
-
+            background: #4a5568;
+            /* bg-gray-600 */
             border-radius: 4px;
-
         }
 
         textarea::-webkit-scrollbar-thumb:hover {
-
-            background: #718096; /* bg-gray-500 */
-
+            background: #718096;
+            /* bg-gray-500 */
         }
 
+        /* Tùy chỉnh checkbox cho đẹp hơn trong dark mode */
+        input[type="checkbox"] {
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            border-radius: 0.25rem; /* rounded */
+            border-color: #4a5568; /* border-gray-600 */
+            background-color: #2d3748; /* bg-gray-800 */
+            color: #4299e1; /* text-blue-600 */
+            transition: all 0.2s ease-in-out;
+        }
+        input[type="checkbox"]:focus {
+            ring: 2px;
+            ring-color: #4299e1; /* ring-blue-500 */
+            ring-offset-color: #1a202c; /* ring-offset-gray-900 */
+        }
+         input[type="checkbox"]:checked {
+            background-color: #4299e1; /* bg-blue-600 */
+            border-color: #4299e1; /* border-blue-600 */
+        }
     </style>
-
 </head>
 
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto">
+    <!-- === THANH ĐIỀU HƯỚNG MỚI === -->
+    <nav class="max-w-7xl mx-auto flex justify-center gap-4 mb-8">
+        <button id="navJson" class="py-2 px-6 rounded-lg font-semibold transition-colors bg-blue-600 text-white shadow-lg">
+            Trình Chuyển Đổi JSON
+        </button>
+        <button id="navConfig" class="py-2 px-6 rounded-lg font-semibold transition-colors bg-gray-700 text-gray-300 hover:bg-gray-600">
+            Cấu hình Merchant
+        </button>
+    </nav>
+    <!-- === KẾT THÚC THANH ĐIỀU HƯỚNG === -->
 
+
+    <!-- === BẮT ĐẦU PHẦN 1: TRÌNH CHUYỂN ĐỔI JSON === -->
+    <!-- Thêm ID và bọc trong div này -->
+    <div id="jsonConverterSection" class="max-w-7xl mx-auto">
         <!-- Tiêu đề -->
-
         <header class="text-center mb-8">
-
             <h1 class="text-3xl md:text-4xl font-bold text-blue-400">Trình Chuyển Đổi JSON</h1>
-
             <p class="text-lg text-gray-400 mt-2">Chuyển đổi giữa Raw JSON Object và Escaped JSON String một cách dễ dàng.</p>
-
         </header>
 
- 
-
         <!-- Bảng điều khiển (Nút bấm) -->
-
         <div class="flex justify-center items-center gap-2 md:gap-4 my-6 flex-wrap">
-
             <button id="escapeBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
-
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1 mr-2" viewBox="0 0 20 20" fill="currentColor">
-
                   <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-
                 </svg>
-
                 Escape (JSON &rarr; String)
-
             </button>
-
             <button id="unescapeBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
-
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1 mr-2" viewBox="0 0 20 20" fill="currentColor">
-
                   <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 111.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-
                 </svg>
-
                 Unescape (String &rarr; JSON)
-
             </button>
-
            
-
             <!-- NÚT GEMINI MỚI -->
-
             <button id="generateBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
-
                 ✨ Tạo JSON
-
             </button>
-
             <button id="fixBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
-
                 ✨ Sửa lỗi JSON
-
             </button>
-
             <button id="explainBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg">
-
                 ✨ Giải thích JSON
-
             </button>
-
             <!-- KẾT THÚC NÚT GEMINI -->
 
- 
-
             <button id="swapBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
-
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1" viewBox="0 0 20 20" fill="currentColor">
-
                   <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-
                 </svg>
-
                 Hoán đổi
-
             </button>
-
             <!-- NÚT ĐỊNH DẠNG MỚI -->
-
             <button id="formatBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
-
                 Định dạng: Gọn
-
             </button>
-
             <button id="clearBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-lg">
-
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1" viewBox="0 0 20 20" fill="currentColor">
-
                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-
                 </svg>
-
                 Xóa
-
             </button>
-
         </div>
-
        
-
         <!-- Thông báo Trạng thái/Lỗi -->
-
         <div id="statusMessage" class="text-center h-6 mb-4 font-medium"></div>
 
- 
-
         <!-- Hai khung nhập liệu -->
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             <!-- Khung bên trái: Đầu vào -->
-
             <div>
-
                 <label for="inputArea" class="block text-sm font-medium text-gray-300 mb-2">Đầu vào (Raw JSON hoặc Escaped String)</label>
-
                 <textarea id="inputArea"
-
                     class="w-full min-h-[400px] md:h-96 p-4 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-blue-500 focus:ring-blue-500 outline-none transition-colors"
-
                     placeholder="Dán JSON hoặc Chuỗi của bạn vào đây..."></textarea>
-
             </div>
-
            
-
             <!-- Khung bên phải: Đầu ra -->
-
             <div>
-
                 <label for="outputArea" class="block text-sm font-medium text-gray-300 mb-2">Đầu ra (Kết quả chuyển đổi)</label>
-
                 <textarea id="outputArea"
-
                     class="w-full min-h-[400px] md:h-96 p-4 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-gray-700 focus:ring-0 outline-none"
-
--                   readonly
-
+                    readonly
                     placeholder="Kết quả sẽ xuất hiện ở đây..."></textarea>
-
             </div>
+        </div>
+    </div>
+    <!-- === KẾT THÚC PHẦN 1 === -->
 
+
+    <!-- === BẮT ĐẦU PHẦN 2: CẤU HÌNH MERCHANT === -->
+    <!-- Thêm ID và class 'hidden' -->
+    <div id="merchantConfigSection" class="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-700 hidden">
+        <!-- Tiêu đề Phần 2 -->
+        <header class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-teal-400">Cấu hình merchant Cổng sau khi go-live</h2>
+        </header>
+
+        <!-- Đầu vào cho Phần 2 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label for="merchantIdInput" class="block text-sm font-medium text-gray-300 mb-2">MerchantID</label>
+                <input type="text" id="merchantIdInput"
+                    class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-teal-500 focus:ring-teal-500 outline-none transition-colors"
+                    placeholder="Ví dụ: 1044">
+            </div>
+            <div>
+                <label for="merchantNameInput" class="block text-sm font-medium text-gray-300 mb-2">MerchantName</label>
+                <input type="text" id="merchantNameInput"
+                    class="w-full p-3 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-teal-500 focus:ring-teal-500 outline-none transition-colors"
+                    placeholder="Ví dụ: SFYFI">
+            </div>
         </div>
 
-    </div>
+        <!-- Các mục cần thực hiện (Checkboxes) -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-300 mb-3">Các item cần thực hiện</label>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <input id="checkRecon" type="checkbox" class="focus:ring-teal-500 text-teal-600 bg-gray-800 border-gray-600 rounded">
+                    <label for="checkRecon" class="ml-3 text-sm font-medium text-gray-300">1. Cấu hình đối soát (reconciliation_partner)</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="checkGalaxyPay" type="checkbox" class="focus:ring-teal-500 text-teal-600 bg-gray-800 border-gray-600 rounded">
+                    <label for="checkGalaxyPay" class="ml-3 text-sm font-medium text-gray-300">2. Cấu hình Danh sách merchant có giao dịch GalaxyPay (WALLET_MERCHANTS)</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="checkIBFT" type="checkbox" class="focus:ring-teal-500 text-teal-600 bg-gray-800 border-gray-600 rounded">
+                    <label for="checkIBFT" class="ml-3 text-sm font-medium text-gray-300">3. Danh sách merchant trong báo cáo IBFT (IBFT_VCCB_SEARCH_MERCHANT)</label>
+                </div>
+            </div>
+        </div>
 
- 
+        <!-- Nút Tạo Cấu Hình -->
+        <div class="text-center my-6">
+            <button id="generateConfigBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg text-lg">
+                Tạo Cấu Hình
+            </button>
+        </div>
+
+        <!-- Thông báo Trạng thái/Lỗi cho Phần 2 -->
+        <div id="configStatusMessage" class="text-center h-6 mb-4 font-medium"></div>
+
+        <!-- Khung Đầu ra cho Phần 2 -->
+        <div>
+            <label for="configOutputArea" class="block text-sm font-medium text-gray-300 mb-2">Kết quả cấu hình</label>
+            <!-- Bọc textarea và nút copy trong 1 div 'relative' -->
+            <div class="relative">
+                <textarea id="configOutputArea"
+                    class="w-full min-h-[400px] p-4 bg-gray-800 border-2 border-gray-700 rounded-lg text-gray-100 font-mono focus:border-gray-700 focus:ring-0 outline-none"
+                    readonly
+                    placeholder="Kết quả cấu hình sẽ xuất hiện ở đây..."></textarea>
+                
+                <!-- Nút Copy mới, định vị tuyệt đối -->
+                <button id="copyConfigBtn" title="Copy to clipboard" class="absolute top-3 right-3 bg-gray-600 hover:bg-gray-500 text-white font-semibold p-2 rounded-lg transition-colors shadow-md text-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                    <!-- Icon Copy (Mặc định) -->
+                    <svg id="copyConfigIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H8zM7 4a1 1 0 011-1h8a1 1 0 011 1v8a1 1 0 01-1 1H8a1 1 0 01-1-1V4z" />
+                      <path d="M4 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" />
+                    </svg>
+                    <!-- Icon Check (Thành công - Ẩn mặc định) -->
+                    <svg id="copyConfigSuccessIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- Nhắc nhở -->
+        <div class="mt-6 p-4 bg-yellow-900/30 border border-yellow-700 rounded-lg text-yellow-300 text-sm">
+            <p class="font-bold mb-2">Nhắc nhở quan trọng:</p>
+            <p>Vui lòng kiểm tra lại các hạng mục khác có thể cần cấu hình thêm (nếu có):</p>
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                <li>Phí phải thu merchant</li>
+                <li>Phí phải trả provider</li>
+                <li>SBV Report Quarterly/Yearly</li>
+                <li>HDBANK_MPGS: Báo anh Chung add MID mới vào báo cáo đối soát của GP</li>
+            </ul>
+        </div>
+    </div>
+    <!-- === KẾT THÚC PHẦN 2 === -->
+
 
     <script>
+        // === SCRIPT CHO PHẦN 1: TRÌNH CHUYỂN ĐỔI JSON ===
 
         // Lấy các phần tử DOM
-
         const inputArea = document.getElementById('inputArea');
-
         const outputArea = document.getElementById('outputArea');
-
         const escapeBtn = document.getElementById('escapeBtn');
-
         const unescapeBtn = document.getElementById('unescapeBtn');
-
         const swapBtn = document.getElementById('swapBtn');
-
         const clearBtn = document.getElementById('clearBtn');
-
-        const statusMessage = document.getElementById('statusMessage');
-
- 
+        // const statusMessage = document.getElementById('statusMessage'); // (Đã được cập nhật bên dưới)
 
         // Nút Gemini
-
         const generateBtn = document.getElementById('generateBtn');
-
         const fixBtn = document.getElementById('fixBtn');
-
         const explainBtn = document.getElementById('explainBtn');
-
         const formatBtn = document.getElementById('formatBtn'); // Nút mới
 
- 
-
         // Trạng thái định dạng: false = Gọn (Compact), true = Đẹp (Pretty)
-
         let isPrettyFormat = false;
 
- 
-
         /**
-
          * Hiển thị thông báo trạng thái hoặc lỗi
-
+         * @param {string} elementId - ID của phần tử để hiển thị thông báo
          * @param {string} message - Nội dung thông báo
-
          * @param {boolean} isError - true nếu là lỗi, false nếu là thành công
-
          * @param {boolean} isLoading - true nếu đang tải
-
          */
+        function showMessage(elementId, message, isError = false, isLoading = false) {
+            const statusElement = document.getElementById(elementId);
+            if (!statusElement) return; // Không làm gì nếu không tìm thấy phần tử
 
-        function showMessage(message, isError = false, isLoading = false) {
-
-            statusMessage.textContent = message;
-
-            statusMessage.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400');
-
+            statusElement.textContent = message;
+            statusElement.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400');
            
-
             if (isError) {
-
-                statusMessage.classList.add('text-red-400');
-
+                statusElement.classList.add('text-red-400');
             } else if (isLoading) {
-
-                statusMessage.classList.add('text-yellow-400');
-
+                statusElement.classList.add('text-yellow-400');
             } else {
-
-                statusMessage.classList.add('text-green-400');
-
+                statusElement.classList.add('text-green-400');
             }
-
         }
 
- 
-
         /**
-
          * Chức năng Escape: Chuyển Raw JSON thành Escaped String
-
          */
-
         function escapeJson() {
-
             const inputText = inputArea.value.trim();
-
             if (!inputText) {
-
-                showMessage("Lỗi: Không có nội dung đầu vào.", true);
-
+                showMessage('statusMessage', "Lỗi: Không có nội dung đầu vào.", true);
                 return;
-
             }
-
- 
 
             try {
-
                 // 1. Phân tích cú pháp JSON để xác thực nó
-
                 const obj = JSON.parse(inputText);
-
                
-
                 // 2. Chuyển đối tượng thành một chuỗi JSON thu gọn
-
                 const minifiedString = JSON.stringify(obj);
-
                
-
                 // 3. Stringify chuỗi đó một lần nữa để escape tất cả các ký tự
-
                 // và thêm dấu ngoặc kép bên ngoài.
-
                 const escapedString = JSON.stringify(minifiedString);
-
                
-
                 outputArea.value = escapedString;
-
-                showMessage("Đã escape JSON thành chuỗi thành công!", false);
-
+                showMessage('statusMessage', "Đã escape JSON thành chuỗi thành công!", false);
             } catch (e) {
-
                 // Nếu JSON.parse thất bại, đó là JSON không hợp lệ
-
-                showMessage("Lỗi: JSON đầu vào không hợp lệ. " + e.message, true);
-
+                showMessage('statusMessage', "Lỗi: JSON đầu vào không hợp lệ. " + e.message, true);
                 outputArea.value = '';
-
             }
-
         }
 
- 
-
         /**
-
          * Chức năng Unescape: Chuyển Escaped String thành Raw JSON
-
          */
-
         function unescapeJson() {
-
             const inputText = inputArea.value.trim();
-
             if (!inputText) {
-
-                showMessage("Lỗi: Không có nội dung đầu vào.", true);
-
+                showMessage('statusMessage', "Lỗi: Không có nội dung đầu vào.", true);
                 return;
-
             }
 
- 
-
             try {
-
                 // 1. Phân tích cú pháp chuỗi bên ngoài (loại bỏ dấu ngoặc kép bên ngoài và unescape)
-
-                // Vd: "\"{\\\"key\\\":\\\"value\\\"}\""  -->  "{\"key\":\"value\"}"
-
                 const unescapedString = JSON.parse(inputText);
 
- 
-
                 // 2. Kiểm tra xem kết quả có phải là một chuỗi không
-
                 if (typeof unescapedString !== 'string') {
-
                     throw new Error("Đầu vào không phải là một chuỗi JSON đã được escape (thiếu dấu ngoặc kép bao ngoài).");
-
                 }
 
- 
-
                 // 3. Phân tích cú pháp chuỗi JSON bên trong
-
-                // Vd: "{\"key\":\"value\"}"  -->  { key: "value" }
-
                 const obj = JSON.parse(unescapedString);
-
                
-
                 // 4. Định dạng lại đối tượng JSON
-
                 const formattedJson = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
-
                
-
                 outputArea.value = formattedJson;
-
-                showMessage("Đã unescape chuỗi thành JSON thành công!", false);
-
+                showMessage('statusMessage', "Đã unescape chuỗi thành JSON thành công!", false);
             } catch (e) {
-
                 // Nếu bất kỳ bước JSON.parse nào thất bại
-
-                showMessage("Lỗi: Chuỗi escape không hợp lệ. " + e.message, true);
-
+                showMessage('statusMessage', "Lỗi: Chuỗi escape không hợp lệ. " + e.message, true);
                 outputArea.value = '';
-
             }
-
         }
 
- 
-
         /**
-
          * Chức năng Hoán đổi: Đảo ngược nội dung 2 khung
-
          */
-
         function swapContent() {
-
             const temp = inputArea.value;
-
             inputArea.value = outputArea.value;
-
             outputArea.value = temp;
-
-            showMessage("Đã hoán đổi nội dung.", false);
-
+            showMessage('statusMessage', "Đã hoán đổi nội dung.", false);
         }
-
- 
 
         /**
-
          * Chức năng Xóa: Xóa sạch nội dung
-
          */
-
         function clearContent() {
-
             inputArea.value = '';
-
             outputArea.value = '';
-
-            statusMessage.textContent = '';
-
+            showMessage('statusMessage', '');
         }
-
- 
 
         // --- TÍNH NĂNG GEMINI API ---
 
- 
-
         /**
-
          * Hàm gọi API của Gemini
-
          * @param {string} userPrompt - Câu lệnh của người dùng
-
          * @param {string} systemInstruction - Hướng dẫn hệ thống cho LLM
-
          * @returns {Promise<string | null>} - Văn bản phản hồi từ LLM hoặc null nếu lỗi
-
          */
-
         async function callGemini(userPrompt, systemInstruction) {
-
-            showMessage("Đang gọi Gemini... ✨", false, true);
-
+            showMessage('statusMessage', "Đang gọi Gemini... ✨", false, true);
             const apiKey = ""; // API key sẽ được cung cấp bởi môi trường
-
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
- 
-
             const payload = {
-
                 contents: [{ parts: [{ text: userPrompt }] }],
-
                 systemInstruction: {
-
                     parts: [{ text: systemInstruction }]
-
                 },
-
             };
 
- 
-
             try {
-
                 // Triển khai chiến lược backoff đơn giản
-
                 let response;
-
                 let attempts = 0;
-
                 const maxAttempts = 3;
-
                 let delay = 1000; // 1 giây
 
- 
-
                 while (attempts < maxAttempts) {
-
                     response = await fetch(apiUrl, {
-
                         method: 'POST',
-
                         headers: { 'Content-Type': 'application/json' },
-
                         body: JSON.stringify(payload)
-
                     });
 
- 
-
                     if (response.ok) {
-
                         break; // Thành công, thoát khỏi vòng lặp
-
                     }
-
                    
-
                     if (response.status === 429) { // Quá nhiều yêu cầu
-
                         console.warn(`API Rate limit exceeded. Retrying in ${delay}ms...`);
-
                         await new Promise(resolve => setTimeout(resolve, delay));
-
                         delay *= 2; // Tăng gấp đôi thời gian chờ
-
                         attempts++;
-
                     } else {
-
                         // Lỗi khác, không thử lại
-
                         const errorBody = await response.text();
-
                         throw new Error(`Lỗi API: ${response.status} ${response.statusText}. Chi tiết: ${errorBody}`);
-
                     }
-
                 }
-
- 
 
                 if (!response.ok) {
-
                     throw new Error(`Đã hết số lần thử lại API. Lỗi cuối cùng: ${response.status}`);
-
                 }
-
- 
 
                 const result = await response.json();
-
                
-
                 if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
-
                     const text = result.candidates[0].content.parts[0].text;
-
                     // Xóa các dấu ```json và ``` có thể LLM trả về
-
                     const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
                     return cleanedText;
-
                 } else {
-
                     // Xử lý các trường hợp bị chặn hoặc không có nội dung
-
                     if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
-
                         throw new Error("Nội dung bị chặn vì lý do an toàn.");
-
                     } else if (result.promptFeedback && result.promptFeedback.blockReason) {
-
                          throw new Error(`Nội dung bị chặn: ${result.promptFeedback.blockReason}`);
-
                     } else {
-
                         throw new Error("Không nhận được phản hồi hợp lệ từ API.");
-
                     }
-
                 }
-
             } catch (e) {
-
                 console.error(e);
-
-                showMessage(`Lỗi: ${e.message}`, true);
-
+                showMessage('statusMessage', `Lỗi: ${e.message}`, true);
                 return null; // Trả về null khi có lỗi
-
             }
-
         }
 
- 
-
         /**
-
          * ✨ Chức năng Tạo JSON: Gọi Gemini để tạo JSON từ văn bản
-
          */
-
         async function generateJson() {
-
             const prompt = inputArea.value.trim();
-
             if (!prompt) {
-
-                showMessage("Lỗi: Vui lòng nhập mô tả để tạo JSON.", true);
-
+                showMessage('statusMessage', "Lỗi: Vui lòng nhập mô tả để tạo JSON.", true);
                 return;
-
             }
-
            
-
             const systemPrompt = "Bạn là một công cụ tạo JSON. Dựa trên mô tả của người dùng, hãy tạo một đối tượng hoặc mảng JSON hợp lệ. Chỉ trả lời bằng mã JSON. Không bao gồm '```json' hoặc bất kỳ văn bản giải thích nào, chỉ trả về JSON thô.";
-
            
-
             const result = await callGemini(prompt, systemPrompt);
-
             if (result) {
-
                 try {
-
                     // Thử parse để xác thực và làm đẹp
-
                     const obj = JSON.parse(result);
-
                     outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
-
-                    showMessage("Đã tạo JSON thành công! ✨", false);
-
+                    showMessage('statusMessage', "Đã tạo JSON thành công! ✨", false);
                 } catch (e) {
-
                     // Nếu LLM trả về không phải JSON, chỉ cần dán văn bản thô
-
                     outputArea.value = result;
-
-                    showMessage("Đã nhận phản hồi, nhưng không phải là JSON hợp lệ.", true);
-
+                    showMessage('statusMessage', "Đã nhận phản hồi, nhưng không phải là JSON hợp lệ.", true);
                 }
-
             }
-
         }
 
- 
-
         /**
-
          * ✨ Chức năng Sửa lỗi JSON: Gọi Gemini để sửa JSON không hợp lệ
-
          */
-
         async function fixJson() {
-
             const brokenJson = inputArea.value.trim();
-
             if (!brokenJson) {
-
-                showMessage("Lỗi: Vui lòng nhập JSON bị lỗi để sửa.", true);
-
+                showMessage('statusMessage', "Lỗi: Vui lòng nhập JSON bị lỗi để sửa.", true);
                 return;
-
             }
-
            
-
             const systemPrompt = "JSON sau đây không hợp lệ hoặc bị hỏng. Hãy phân tích nó, sửa các lỗi cú pháp (như thiếu dấu phẩy, dấu ngoặc kép hoặc dấu ngoặc) và trả về JSON đã được sửa, hợp lệ. Chỉ trả lời bằng khối mã JSON đã sửa. Không bao gồm '```json' hoặc bất kỳ văn bản giải thích nào.";
 
- 
-
             const result = await callGemini(brokenJson, systemPrompt);
-
             if (result) {
-
                 try {
-
                     // Xác thực và làm đẹp JSON đã sửa
-
                     const obj = JSON.parse(result);
-
                     outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
-
-                    showMessage("Đã sửa lỗi JSON thành công! ✨", false);
-
+                    showMessage('statusMessage', "Đã sửa lỗi JSON thành công! ✨", false);
                 } catch (e) {
-
                     // Nếu LLM vẫn trả về JSON không hợp lệ
-
                     outputArea.value = result; // Hiển thị những gì nó đã cố gắng
-
-                    showMessage("Gemini đã cố gắng sửa, nhưng kết quả vẫn không phải là JSON hợp lệ.", true);
-
+                    showMessage('statusMessage', "Gemini đã cố gắng sửa, nhưng kết quả vẫn không phải là JSON hợp lệ.", true);
                 }
-
             }
-
         }
-
- 
 
         /**
-
          * ✨ Chức năng Giải thích JSON: Gọi Gemini để giải thích JSON
-
          */
-
         async function explainJson() {
-
             const jsonText = inputArea.value.trim();
-
             if (!jsonText) {
-
-                showMessage("Lỗi: Vui lòng nhập JSON để giải thích.", true);
-
+                showMessage('statusMessage', "Lỗi: Vui lòng nhập JSON để giải thích.", true);
                 return;
-
             }
-
- 
 
             // Kiểm tra xem JSON có hợp lệ không trước khi gửi
-
             try {
-
                 JSON.parse(jsonText);
-
             } catch (e) {
-
-                showMessage("Lỗi: Chỉ có thể giải thích JSON hợp lệ. Có vẻ như JSON của bạn bị lỗi.", true);
-
+                showMessage('statusMessage', "Lỗi: Chỉ có thể giải thích JSON hợp lệ. Có vẻ như JSON của bạn bị lỗi.", true);
                 return;
-
             }
-
            
-
             const systemPrompt = "Bạn là một nhà phân tích dữ liệu JSON. Hãy giải thích ngắn gọn dữ liệu JSON sau đây đại diện cho điều gì trong một hoặc hai câu. Trả lời bằng tiếng Việt.";
 
- 
-
             const result = await callGemini(jsonText, systemPrompt);
-
             if (result) {
-
                 outputArea.value = result;
-
-                showMessage("Đã giải thích JSON thành công! ✨", false);
-
+                showMessage('statusMessage', "Đã giải thích JSON thành công! ✨", false);
             }
-
         }
 
- 
-
-        // Gán sự kiện cho các nút
-
+        // Gán sự kiện cho các nút Phần 1
         escapeBtn.addEventListener('click', escapeJson);
-
         unescapeBtn.addEventListener('click', unescapeJson);
-
         swapBtn.addEventListener('click', swapContent);
-
         clearBtn.addEventListener('click', clearContent);
-
- 
-
-        // Gán sự kiện cho các nút Gemini
-
         generateBtn.addEventListener('click', generateJson);
-
         fixBtn.addEventListener('click', fixJson);
-
         explainBtn.addEventListener('click', explainJson);
 
- 
-
         // Gán sự kiện cho nút Định dạng
-
         formatBtn.addEventListener('click', () => {
-
-            // Đảo ngược trạng thái
-
             isPrettyFormat = !isPrettyFormat;
-
            
-
-            // Cập nhật giao diện nút
-
             if (isPrettyFormat) {
-
                 formatBtn.textContent = 'Định dạng: Đẹp';
-
                 formatBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
-
                 formatBtn.classList.add('bg-teal-600', 'hover:bg-teal-700');
-
             } else {
-
                 formatBtn.textContent = 'Định dạng: Gọn';
-
                 formatBtn.classList.remove('bg-teal-600', 'hover:bg-teal-700');
-
                 formatBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
-
             }
-
- 
-
-            // Thử định dạng lại nội dung hiện có trong outputArea
 
             const currentOutput = outputArea.value.trim();
-
             if (currentOutput) {
-
                 try {
-
                     const obj = JSON.parse(currentOutput);
-
-                    // Chỉ định dạng lại nếu nó là JSON hợp lệ
-
                     outputArea.value = JSON.stringify(obj, null, isPrettyFormat ? 2 : undefined);
-
-                    showMessage(isPrettyFormat ? "Đã định dạng: Đẹp" : "Đã định dạng: Gọn", false);
-
+                    showMessage('statusMessage', isPrettyFormat ? "Đã định dạng: Đẹp" : "Đã định dạng: Gọn", false);
                 } catch (e) {
-
-                    // Bỏ qua nếu không phải JSON (ví dụ: là văn bản giải thích)
-
+                    // Bỏ qua
                 }
+            }
+        });
 
+
+        // === SCRIPT CHO PHẦN 2: CẤU HÌNH MERCHANT ===
+
+        // Lấy các phần tử DOM cho Phần 2
+        const merchantIdInput = document.getElementById('merchantIdInput');
+        const merchantNameInput = document.getElementById('merchantNameInput');
+        const checkRecon = document.getElementById('checkRecon');
+        const checkGalaxyPay = document.getElementById('checkGalaxyPay');
+        const checkIBFT = document.getElementById('checkIBFT');
+        const generateConfigBtn = document.getElementById('generateConfigBtn');
+        const configOutputArea = document.getElementById('configOutputArea');
+        // Lấy các phần tử nút sao chép mới
+        const copyConfigBtn = document.getElementById('copyConfigBtn');
+        const copyConfigIcon = document.getElementById('copyConfigIcon');
+        const copyConfigSuccessIcon = document.getElementById('copyConfigSuccessIcon');
+
+        /**
+         * Chức năng tạo chuỗi cấu hình
+         */
+        function generateConfig() {
+            const merchantId = merchantIdInput.value.trim();
+            const merchantName = merchantNameInput.value.trim();
+
+            // Kiểm tra đầu vào
+            if (!merchantId || !merchantName) {
+                showMessage('configStatusMessage', 'Lỗi: Vui lòng nhập đầy đủ MerchantID và MerchantName.', true);
+                configOutputArea.value = '';
+                return;
+            }
+            
+            let results = []; // Mảng chứa các chuỗi kết quả
+
+            // 1. Cấu hình đối soát
+            if (checkRecon.checked) {
+                const reconJson = {
+                    "group_type": "MERCHANT",
+                    "partner_id": merchantName,
+                    "partner_name": merchantName,
+                    "merchant_id": [ merchantId ],
+                    "method": [
+                        "GALAXYPAY",
+                        "MOMO",
+                        "VIETTEL",
+                        "ZALOPAY",
+                        "NAPAS",
+                        "VN_INT_CARD",
+                        "OUT_INT_CARD",
+                        "QRPAY"
+                    ],
+                    "channel": "PaymentGateway",
+                    "service": [
+                        "PAYMENT",
+                        "REFUND"
+                    ],
+                    "status": "ACTIVE"
+                };
+                
+                const reconString = "--- 1. Cấu hình đối soát (reconciliation_partner) ---\n" + 
+                                  JSON.stringify(reconJson, null, 2); // Định dạng đẹp
+                results.push(reconString);
             }
 
+            // 2. Cấu hình GalaxyPay
+            if (checkGalaxyPay.checked) {
+                const galaxyPayString = `--- 2. Cấu hình Danh sách merchant có giao dịch GalaxyPay ---\n` +
+                                      `MySQL-Operation\n` +
+                                      `ems/ system_param\n` +
+                                      `param_id = "WALLET_MERCHANTS"\n` +
+                                      `{"id":"${merchantId}","title":"${merchantName}"}`;
+                results.push(galaxyPayString);
+            }
+
+            // 3. Cấu hình IBFT
+            if (checkIBFT.checked) {
+                const ibftString = `--- 3. Danh sách merchant trong báo cáo IBFT ---\n` +
+                                 `MySQL-Operation\n` +
+                                 `ems/ system_param\n` +
+                                 `param_id = IBFT_VCCB_SEARCH_MERCHANT\n` +
+                                 `{"id":"${merchantName}","title":"${merchantName}"}`;
+                results.push(ibftString);
+            }
+
+            // Hiển thị kết quả
+            if (results.length === 0) {
+                showMessage('configStatusMessage', 'Vui lòng chọn ít nhất một mục để tạo cấu hình.', false, true); // Dùng màu vàng (isLoading = true) cho thông báo
+                configOutputArea.value = '';
+            } else {
+                configOutputArea.value = results.join('\n\n==================================================\n\n'); // Tách các kết quả
+                showMessage('configStatusMessage', 'Đã tạo cấu hình thành công!', false);
+            }
+        }
+
+        // Gán sự kiện cho nút Tạo Cấu Hình (Phần 2)
+        generateConfigBtn.addEventListener('click', generateConfig);
+
+        // Gán sự kiện cho nút Sao chép (Phần 2)
+        copyConfigBtn.addEventListener('click', () => {
+            const textToCopy = configOutputArea.value;
+
+            if (!textToCopy) {
+                showMessage('configStatusMessage', 'Không có gì để sao chép!', true);
+                return;
+            }
+
+            // 1. Chọn văn bản trong textarea (hoạt động ngay cả khi readonly)
+            configOutputArea.select();
+            // configOutputArea.setSelectionRange(0, 99999); // Để đảm bảo hoạt động trên di động
+
+            try {
+                // 2. Thực thi lệnh sao chép
+                const successful = document.execCommand('copy');
+                
+                if (successful) {
+                    showMessage('configStatusMessage', 'Đã sao chép vào clipboard!', false);
+                    
+                    // Chuyển đổi icon
+                    copyConfigIcon.classList.add('hidden');
+                    copyConfigSuccessIcon.classList.remove('hidden');
+
+                    // Đặt lại icon sau 2 giây
+                    setTimeout(() => {
+                        copyConfigIcon.classList.remove('hidden');
+                        copyConfigSuccessIcon.classList.add('hidden');
+                    }, 2000);
+                } else {
+                    throw new Error('document.execCommand returned false');
+                }
+            } catch (err) {
+                console.error('Không thể sao chép: ', err);
+                showMessage('configStatusMessage', 'Lỗi: Không thể sao chép tự động.', true);
+            }
+
+            // 3. Bỏ chọn văn bản để người dùng không bị khó chịu
+            window.getSelection().removeAllRanges();
+        });
+
+
+        // === SCRIPT CHO PHẦN 3: ĐIỀU HƯỚNG TAB ===
+        const navJson = document.getElementById('navJson');
+        const navConfig = document.getElementById('navConfig');
+        const jsonConverterSection = document.getElementById('jsonConverterSection');
+        const merchantConfigSection = document.getElementById('merchantConfigSection');
+
+        // Hàm cập nhật trạng thái active cho nút nav
+        function setActiveNav(activeButton, inactiveButton) {
+            // Active button
+            activeButton.classList.remove('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+            activeButton.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            
+            // Inactive button
+            inactiveButton.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+            inactiveButton.classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+        }
+
+        // Mặc định hiển thị Trình chuyển đổi JSON
+        navJson.addEventListener('click', () => {
+            jsonConverterSection.classList.remove('hidden');
+            merchantConfigSection.classList.add('hidden');
+            setActiveNav(navJson, navConfig);
+        });
+
+        // Hiển thị Cấu hình Merchant
+        navConfig.addEventListener('click', () => {
+            jsonConverterSection.classList.add('hidden');
+            merchantConfigSection.classList.remove('hidden');
+            setActiveNav(navConfig, navJson);
+
+            // Đổi màu nút active cho tab 2 (màu teal)
+            navConfig.classList.remove('bg-blue-600');
+            navConfig.classList.add('bg-teal-600'); // Màu teal giống tiêu đề
+            
+            navJson.classList.remove('bg-teal-600'); // Đảm bảo nút kia về màu xám
         });
 
     </script>
 
 </body>
-
 </html>
 
- 
